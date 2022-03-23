@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/container"
+    android:background="@color/black">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_margin="8dp">
+        <ImageView
+            android:layout_width="40dp"
+            android:padding="8dp"
+            android:layout_height="40dp"
+            android:id="@+id/img_fileType"
+            android:src="@drawable/ic_folder">
+
+        </ImageView>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:id="@+id/tv_fileName"
+                android:text="File name.png"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:ellipsize="marquee"
+                android:layout_marginLeft="10dp"
+
+                android:textSize="18sp"
+                android:textColor="@color/green"
+                android:singleLine="true"
+                android:textAlignment="gravity"
+                android:gravity="center_vertical">
+
+            </TextView>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/tvFileSize"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginLeft="10dp"
+                ></TextView>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
