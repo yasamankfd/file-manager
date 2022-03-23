@@ -1,14 +1,14 @@
 package com.example.filemanager.fragments;
 
 import android.Manifest;
-import android.content.Intent;
-import android.net.Uri;
+import android.app.Dialog;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,9 +21,7 @@ import com.example.filemanager.FileAddapter;
 import com.example.filemanager.FileOpener;
 import com.example.filemanager.OnFileSelectedListener;
 import com.example.filemanager.R;
-import com.karumi.dexter.BuildConfig;
 import com.karumi.dexter.Dexter;
-import com.karumi.dexter.DexterBuilder;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
@@ -33,17 +31,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
 public class InternalFragment extends Fragment implements OnFileSelectedListener {
 
-    private RecyclerView recyclerView;
-    private List<File> fileList;
-    private ImageView img_back;
-    private TextView tv_pathHolder;
-    private FileAddapter fileAddapter;
     File storage;
     String data = "it is null now";
+    String[] items = {"details","rename","delete","share"};
 
     View view;
 
@@ -54,12 +46,13 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_internal,container,false);
 
-        tv_pathHolder = view.findViewById(R.id.tv_pathHolder);
-        img_back = view.findViewById(R.id.img_back);
+        TextView tv_pathHolder = view.findViewById(R.id.tv_pathHolder);
+        ImageView img_back = view.findViewById(R.id.img_back);
         
 
         
         String internalStorage = System.getenv("EXTERNAL_STORAGE");
+        assert internalStorage != null;
         storage = new File(internalStorage);
 
 
@@ -68,8 +61,7 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
             if(bundle!=null)
             {
                 data = getArguments().getString("path");
-                File file = new File(data);
-                storage = file;
+                storage = new File(data);
             }
 
 
@@ -95,9 +87,7 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
                         permissionToken.continuePermissionRequest();
                     }
                 }).check();
-//        Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-//        Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
-//        this.startActivity(intent);
+
 
     }
 
@@ -105,6 +95,7 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
         ArrayList<File> arrayList = new ArrayList<>();
         File[] files = file.listFiles();
 
+        assert files != null;
         for(File singleFile : files)
         {
 
@@ -132,12 +123,11 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
         return arrayList;
     }
     private void displayFiles() {
-        recyclerView = view.findViewById(R.id.recycler_internal);
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_internal);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(),1));
-        fileList = new ArrayList<>();
-        fileList.addAll(findFiles(storage));
-        fileAddapter = new FileAddapter(getContext(),fileList,this);
+        List<File> fileList = new ArrayList<>(findFiles(storage));
+        FileAddapter fileAddapter = new FileAddapter(getContext(), fileList, this);
         recyclerView.setAdapter(fileAddapter);
 
     }
@@ -149,6 +139,7 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
             bundle.putString("path",file.getAbsolutePath());
             InternalFragment internalFragment = new InternalFragment();
             internalFragment.setArguments(bundle);
+            assert getFragmentManager() != null;
             getFragmentManager().beginTransaction().replace(R.id.fragment_container,internalFragment).addToBackStack(null).commit();
         }else {
 
@@ -163,5 +154,48 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
     @Override
     public void onFileLongClicked(File file) {
 
+        final Dialog optionDialog = new Dialog(getContext());
+        optionDialog.setContentView(R.layout.option_dialog);
+        optionDialog.setTitle("select Option :");
+        ListView options = (ListView) optionDialog.findViewById(R.id.list);
+        CustomAdapter customAdapter = new CustomAdapter();
+        options.setAdapter(customAdapter);
+        optionDialog.show();
+    }
+
+    class CustomAdapter extends BaseAdapter{
+
+        @Override
+        public int getCount() {
+            return items.length;
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return items[i];
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            View myView = getLayoutInflater().inflate(R.layout.option_layout,null);
+            ImageView img = myView.findViewById(R.id.imgOption);
+            TextView txt = myView.findViewById(R.id.txtOption);
+            txt.setText(items[i]);
+            if(items[i].equals("details")){
+                img.setImageResource(R.drawable.ic_info);
+            }else if(items[i].equals("delete")){
+                img.setImageResource(R.drawable.ic_delete);
+            }if(items[i].equals("share")){
+                img.setImageResource(R.drawable.ic_share);
+            }else if(items[i].equals("rename")){
+                img.setImageResource(R.drawable.ic_rename);
+            }
+            return myView;
+        }
     }
 }
