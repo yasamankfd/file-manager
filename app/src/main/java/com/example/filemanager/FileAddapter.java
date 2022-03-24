@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.format.Formatter;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -14,9 +13,9 @@ import java.io.File;
 import java.util.List;
 
 public class FileAddapter extends RecyclerView.Adapter<FileViewHolder> {
-    private Context context;
-    private List<File> file;
-    private OnFileSelectedListener listener;
+    private final Context context;
+    private final List<File> file;
+    private final OnFileSelectedListener listener;
 
     public FileAddapter(Context context, List<File> file, OnFileSelectedListener listener) {
         this.context = context;
@@ -37,16 +36,12 @@ public class FileAddapter extends RecyclerView.Adapter<FileViewHolder> {
         return position;
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull FileViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         String ss = file.get(position).getName();
-        if(!ss.equals(null))
-
-        {
-            holder.tvName.setText(ss);
-        }else  holder.tvSize.setText("null");
-
+        holder.tvName.setText(ss);
 
 
         holder.tvName.setSelected(true);
@@ -66,14 +61,11 @@ public class FileAddapter extends RecyclerView.Adapter<FileViewHolder> {
             }
 
             String s = String.valueOf(items);
-            if(!s.equals(null))
-            {
-                holder.tvSize.setText(s+"Files");
-            }else  holder.tvSize.setText("null");
+            holder.tvSize.setText(s+"Files");
 
         }else {
             String s = Formatter.formatShortFileSize(context, file.get(position).length());
-            if(!s.equals(null))
+            if(s != null)
             {
                 holder.tvSize.setText(s);
 
@@ -90,13 +82,13 @@ public class FileAddapter extends RecyclerView.Adapter<FileViewHolder> {
         if(file.get(position).getName().toLowerCase().endsWith(".pdf")){
             holder.imgFile.setImageResource(R.drawable.ic_pdf);
         }else
-        if(file.get(position).getName().toLowerCase().endsWith(".doc")){
+        if(file.get(position).getName().toLowerCase().endsWith(".docx")){
             holder.imgFile.setImageResource(R.drawable.ic_doc);
         }else
         if( file.get(position).getName().toLowerCase().endsWith(".wav")){
             holder.imgFile.setImageResource(R.drawable.ic_music);
         }else
-            if(file.get(position).getName().toLowerCase().endsWith(".mp3")){
+            if(file.get(position).getName().toLowerCase().endsWith(".mp3") || file.get(position).getName().toLowerCase().endsWith(".mkv")){
             holder.imgFile.setImageResource(R.drawable.ic_music);
         }else
         if(file.get(position).getName().toLowerCase().endsWith(".mp4")){
@@ -107,22 +99,14 @@ public class FileAddapter extends RecyclerView.Adapter<FileViewHolder> {
         }else if(file.get(position).isDirectory()){
             holder.imgFile.setImageResource(R.drawable.ic_folder);
         }else {
-            holder.imgFile.setImageResource(R.drawable.ic_doc);
+            holder.imgFile.setImageResource(R.drawable.ic_unkown);
         }
 
-        holder.container.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.onFileClicked(file.get(position));
-            }
-        });
+        holder.container.setOnClickListener(view -> listener.onFileClicked(file.get(position)));
 
-        holder.container.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                listener.onFileLongClicked(file.get(position));
-                return true;
-            }
+        holder.container.setOnLongClickListener(view -> {
+            listener.onFileLongClicked(file.get(position));
+            return true;
         });
     }
 

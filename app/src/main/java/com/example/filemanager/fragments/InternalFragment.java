@@ -106,14 +106,16 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
         }
         for( File singleFile : files)
         {
-            if(singleFile.getName().toLowerCase().endsWith(".jpg") ||
-                    singleFile.getName().toLowerCase().endsWith(".png") ||
-                    singleFile.getName().toLowerCase().endsWith(".wav") ||
-                    singleFile.getName().toLowerCase().endsWith(".mp4") ||
-                    singleFile.getName().toLowerCase().endsWith(".pdf") ||
-                    singleFile.getName().toLowerCase().endsWith(".doc") ||
-                    singleFile.getName().toLowerCase().endsWith(".apk") ||
-                    singleFile.getName().toLowerCase().endsWith(".jpeg"))
+//            if(singleFile.getName().toLowerCase().endsWith(".jpg") ||
+//                    singleFile.getName().toLowerCase().endsWith(".png") ||
+//                    singleFile.getName().toLowerCase().endsWith(".wav") ||
+//                    singleFile.getName().toLowerCase().endsWith(".mp4") ||
+//                    singleFile.getName().toLowerCase().endsWith(".pdf") ||
+//                    singleFile.getName().toLowerCase().endsWith(".docx") ||
+//                    singleFile.getName().toLowerCase().endsWith(".apk") ||
+//                    singleFile.getName().toLowerCase().endsWith(".mp3") ||
+//                    singleFile.getName().toLowerCase().endsWith(".mkv") ||
+//                    singleFile.getName().toLowerCase().endsWith(".jpeg"))
 
             {
                 arrayList.add(singleFile);
