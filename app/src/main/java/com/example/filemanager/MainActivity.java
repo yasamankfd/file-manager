@@ -16,8 +16,6 @@ import com.example.filemanager.fragments.HomeFragment;
 import com.example.filemanager.fragments.InternalFragment;
 import com.google.android.material.navigation.NavigationView;
 
-import java.util.function.ToDoubleBiFunction;
-
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
     private DrawerLayout drawerLayout;
 

@@ -13,7 +13,7 @@ public class FileOpener {
     public static  void openfile(Context context, File file) throws IOException {
 
         File selectedFile = file;
-        Uri uri = FileProvider.getUriForFile(context,context.getApplicationContext().getPackageName()+".provider",file);
+        Uri uri = FileProvider.getUriForFile(context,context.getPackageName()+".provider",selectedFile);
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         if(uri.toString().contains(".doc")){

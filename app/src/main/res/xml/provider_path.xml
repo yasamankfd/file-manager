@@ -4,4 +4,7 @@
     <external-path
         name="external files"
         path="."></external-path>
+    <paths>
+        <root-path name="root" path="." />
+    </paths>
 </paths>
