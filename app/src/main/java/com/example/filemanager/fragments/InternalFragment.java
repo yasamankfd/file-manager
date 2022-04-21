@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.UriPermission;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -22,8 +21,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -37,7 +34,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.filemanager.BuildConfig;
 import com.example.filemanager.FileAddapter;
 import com.example.filemanager.FileOpener;
-import com.example.filemanager.MainActivity;
 import com.example.filemanager.OnFileSelectedListener;
 import com.example.filemanager.R;
 
@@ -47,7 +43,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 public class InternalFragment extends Fragment implements OnFileSelectedListener {
 
@@ -56,7 +51,7 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
     File storage;
     String data = "it is null now";
     String[] items = {"details","rename","delete","share"};
-    ActivityResultLauncher<Intent> activityResultLauncher;
+
 
     View view;
 
@@ -69,7 +64,7 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
         view = inflater.inflate(R.layout.fragment_internal,container,false);
 
         TextView tv_pathHolder = view.findViewById(R.id.tv_pathHolder);
-        ImageView img_back = view.findViewById(R.id.img_back);
+
         
 
         
@@ -277,13 +272,10 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
                 case "delete":
                     AlertDialog.Builder deletedialog =  new AlertDialog.Builder(getContext());
                     deletedialog.setTitle("delete "+file.getName()+" ?");
-                    deletedialog.setPositiveButton("yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            file.delete();
-                            fileList.remove(position);
-                            fileAddapter.notifyDataSetChanged();
-                        }
+                    deletedialog.setPositiveButton("yes", (dialogInterface, i14) -> {
+                        file.delete();
+                        fileList.remove(position);
+                        fileAddapter.notifyDataSetChanged();
                     });
                     deletedialog.setNegativeButton("no", new DialogInterface.OnClickListener() {
                         @Override
