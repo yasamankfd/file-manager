@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class FileViewHolder extends RecyclerView.ViewHolder {
 
-    public TextView tvName,tvSize;
+    public TextView tvName,tvSize,date;
     public CardView container;
     public ImageView imgFile;
     public FileViewHolder(@NonNull View itemView) {
@@ -21,6 +21,7 @@ public class FileViewHolder extends RecyclerView.ViewHolder {
         tvSize = itemView.findViewById(R.id.tvFileSize);
         container = itemView.findViewById(R.id.container);
         imgFile = itemView.findViewById(R.id.img_fileType);
+        date = itemView.findViewById(R.id.tvFiledate);
 
     }
 }

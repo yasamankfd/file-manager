@@ -21,8 +21,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -33,6 +31,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.filemanager.AsyncFileTypes;
 import com.example.filemanager.BuildConfig;
 import com.example.filemanager.FileAddapter;
 import com.example.filemanager.FileOpener;
@@ -45,15 +44,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class CategorizedFragment extends Fragment implements OnFileSelectedListener {
 
     List<File> fileList;
     FileAddapter fileAddapter;
-    File storage;
-    String data = "it is null now";
+    String type;
     String[] items = {"details","rename","delete","share"};
-    ActivityResultLauncher<Intent> activityResultLauncher;
     File path;
 
     View view;
@@ -67,41 +65,10 @@ public class CategorizedFragment extends Fragment implements OnFileSelectedListe
         view = inflater.inflate(R.layout.fragment_categorized,container,false);
 
         ImageView img_back = view.findViewById(R.id.img_back);
-        
-
-        
-//        String internalStorage = System.getenv("EXTERNAL_STORAGE");
-//        assert internalStorage != null;
-//        storage = new File(internalStorage);
 
         Bundle b = this.getArguments();
-        if(b.getString("fileType").equals("download"))
-        {
-            path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-
-        }
-        else if(b.getString("fileType").equals("image"))
-        {
-            path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-
-        } if(b.getString("fileType").equals("music"))
-        {
-            path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
-
-        }if(b.getString("fileType").equals("video"))
-        {
-            path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
-
-        }if(b.getString("fileType").equals("doc"))
-        {
-            path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-
-        }if(b.getString("fileType").equals("apk"))
-        {
-            path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-
-        }
-
+        path = Environment.getExternalStorageDirectory();
+        type = b.getString("fileType");
 
         runtimePermission();
         return view;
@@ -109,34 +76,14 @@ public class CategorizedFragment extends Fragment implements OnFileSelectedListe
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     private void runtimePermission() {
-
-
         if(checkpermission())
         {
-
             displayFiles();
         }else{
             requestpermission();
             displayFiles();
         }
-//        Dexter.withContext(getContext()).withPermissions(Manifest.permission.MANAGE_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE).withListener(
-//                new MultiplePermissionsListener() {
-//                    @Override
-//                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-//                        displayFiles();
-//                    }
-//
-//                    @Override
-//                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
-//                        permissionToken.continuePermissionRequest();
-//                    }
-//                }).check();
-
-
     }
-
-
-
 
     private void requestpermission() {
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.R){
@@ -187,71 +134,30 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
         }
     }
 
-    public ArrayList<File> findFiles(File file){
-        ArrayList<File> arrayList = new ArrayList<>();
-        File[] files = file.listFiles();
-
-        assert files != null;
-        for(File singleFile : files)
-        {
-
-            if (singleFile.isDirectory() && !singleFile.isHidden())
-            {
-                arrayList.addAll(findFiles(singleFile));
-            }else {
-
-                switch (getArguments().getString("fileType")){
-                    case "image":
-                        if(singleFile.getName().toLowerCase().endsWith(".jpeg") || singleFile.getName().toLowerCase().endsWith(".jpg") || singleFile.getName().toLowerCase().endsWith(".png"))
-                        {
-                            arrayList.add(singleFile);
-                        }
-                        break;
-                    case "video":
-                        if (singleFile.getName().toLowerCase().endsWith(".mp4")|| singleFile.getName().toLowerCase().endsWith(".mkv") || singleFile.getName().toLowerCase().endsWith(".avi"))
-                        {
-                            arrayList.add(singleFile);
-                        }
-                        break;
-                    case "music":
-                        if(singleFile.getName().toLowerCase().endsWith(".mp3")|| singleFile.getName().toLowerCase().endsWith(".wav"))
-                        {
-                            arrayList.add(singleFile);
-                        }
-                        break;
-                    case "apk":
-                        if(singleFile.getName().toLowerCase().endsWith(".apk"))
-                        {
-                            arrayList.add(singleFile);
-                        }
-                        break;
-                    case "doc":
-                        if(singleFile.getName().toLowerCase().endsWith(".pdf")|| singleFile.getName().toLowerCase().endsWith(".docx"))
-                        {
-                            arrayList.add(singleFile);
-                        }
-                        break;
-                    case "download":
-                        arrayList.add(singleFile);
-                        break;
-
-                }
-            }
-        }
-//        for( File singleFile : files)
-//        {
-//                arrayList.add(singleFile);
-//        }
-        return arrayList;
-    }
     private void displayFiles() {
         RecyclerView recyclerView = view.findViewById(R.id.recycler_internal);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(),1));
-        fileList = new ArrayList<>(findFiles(path));
+        fileList = new ArrayList<>();
+
+        ArrayList<File> a = new ArrayList<>();
+        File pathForFiles ;
+        if(type.equals("download")){
+            pathForFiles = new File(Environment.DIRECTORY_DOWNLOADS);
+        }else pathForFiles = Environment.getExternalStorageDirectory();
+        AsyncFileTypes asyncFiles = new AsyncFileTypes(pathForFiles,type);
+        asyncFiles.execute();
+
+        try {
+            a = asyncFiles.get();
+            asyncFiles.cancel(true);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        fileList.addAll(a);
         fileAddapter = new FileAddapter(getContext(), fileList, this);
         recyclerView.setAdapter(fileAddapter);
-
     }
 
     @Override
@@ -402,4 +308,5 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
             return myView;
         }
     }
+
 }

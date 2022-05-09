@@ -19,11 +19,20 @@
             android:src="@drawable/ic_folder">
 
         </ImageView>
+
+
+
+
+
+
+
+
+
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
@@ -32,24 +41,60 @@
                 android:marqueeRepeatLimit="marquee_forever"
                 android:ellipsize="marquee"
                 android:layout_marginLeft="10dp"
-
                 android:textSize="18sp"
                 android:textColor="@color/green"
                 android:singleLine="true"
                 android:textAlignment="gravity"
                 android:gravity="center_vertical">
-
             </TextView>
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/tvFileSize"
-                android:textColor="@android:color/darker_gray"
-                android:layout_marginLeft="10dp"
-                ></TextView>
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvFileSize"
+                    android:text="size"
+                    android:textColor="@android:color/darker_gray"
+                    android:layout_marginLeft="10dp">
+
+                </TextView>
+                <TextView
+                    android:layout_width="80dp"
+                    android:layout_height="0dp"></TextView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvFiledate"
+                    android:text="date"
+                    android:textColor="@android:color/darker_gray"
+                    android:layout_marginLeft="10dp"
+                    >
+
+                </TextView>
 
 
+
+
+
+            </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="@color/green"></TextView>
         </LinearLayout>
+
+
+
+
+
+
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

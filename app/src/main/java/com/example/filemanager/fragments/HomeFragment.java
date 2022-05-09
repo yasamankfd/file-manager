@@ -33,6 +33,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.filemanager.AsyncRecent;
 import com.example.filemanager.BuildConfig;
 import com.example.filemanager.FileAddapter;
 import com.example.filemanager.FileOpener;
@@ -44,10 +45,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class HomeFragment extends Fragment implements OnFileSelectedListener {
     List<File> fileList;
@@ -162,24 +163,7 @@ public class HomeFragment extends Fragment implements OnFileSelectedListener {
             requestpermission();
             displayFiles();
         }
-//        Dexter.withContext(getContext()).withPermissions(Manifest.permission.MANAGE_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE).withListener(
-//                new MultiplePermissionsListener() {
-//                    @Override
-//                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-//                        displayFiles();
-//                    }
-//
-//                    @Override
-//                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
-//                        permissionToken.continuePermissionRequest();
-//                    }
-//                }).check();
-
-
     }
-
-
-
 
     private void requestpermission() {
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.R){
@@ -230,87 +214,36 @@ public class HomeFragment extends Fragment implements OnFileSelectedListener {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
-
-    public ArrayList<File> findFiles(File file){
-        ArrayList<File> arrayList = new ArrayList<>();
-        File[] files = file.listFiles();
-
-
-        if(files!=null)
-        {
-            Arrays.sort(files,Comparator.comparing(File::lastModified).reversed());
-            for(File singleFile : files)
-            {
-                if (singleFile.isDirectory() && !singleFile.isHidden() )
-                {
-                    if(singleFile!=null)
-                    {
-                        //arrayList.addAll(findFiles(singleFile));
-                    }
-                }else arrayList.add(singleFile);
-            }
-        }else ;
-
-
-        arrayList.sort(Comparator.comparing(File::lastModified).reversed());
-        return arrayList;
-    }
-    public ArrayList<File> findFiles2(File file){
-        ArrayList<File> arrayList = new ArrayList<>();
-        File[] files = file.listFiles();
-
-
-        if(files!=null)
-        {
-            Arrays.sort(files,Comparator.comparing(File::lastModified).reversed());
-            int j;
-            if(files.length<10)
-            {
-                j=files.length;
-            }else j=10;
-            for(int i=0;i<j;i++)
-            {
-                if (files[i].isDirectory() && !files[i].isHidden() )
-                {
-                        arrayList.addAll(findFiles2(files[i]));
-                }else arrayList.add(files[i]);
-            }
-        }else ;
-
-        arrayList.sort(Comparator.comparing(File::lastModified).reversed());
-        return arrayList;
-    }
     @RequiresApi(api = Build.VERSION_CODES.R)
     private void displayFiles() {
 
         RecyclerView recyclerView = view.findViewById(R.id.recycler_recent);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(),1));
-        fileList = new ArrayList<>(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)));
-        fileList.addAll(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)));
-        fileList.addAll(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)));
-        fileList.addAll(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)));
-        fileList.addAll(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_ALARMS)));
-        fileList.addAll(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_AUDIOBOOKS)));
-        fileList.addAll(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_NOTIFICATIONS)));
-        fileList.addAll(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PODCASTS)));
-        fileList.addAll(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_RINGTONES)));
-        fileList.addAll(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)));
-        fileList.addAll(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
-        fileList.addAll(findFiles2(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_SCREENSHOTS)));
-//        fileList.addAll(findFiles2(Environment.getExternalStorageDirectory()));
-//        fileList.addAll(findFiles(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)));
-//        fileList.addAll(findFiles(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)));
-        fileList.sort(Comparator.comparing(File::lastModified).reversed());
+        fileList = new ArrayList<>();
+
+
+        String internalStorage = System.getenv("EXTERNAL_STORAGE");
+        assert internalStorage != null;
+        File ff = new File(internalStorage);
+        ArrayList<File> a = new ArrayList<>();
+        AsyncRecent asyncRecent = new AsyncRecent(Environment.getExternalStorageDirectory());
+        asyncRecent.execute();
+
+        try {
+            a = asyncRecent.get();
+            asyncRecent.cancel(true);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        fileList.addAll(a);
+
         fileAddapter = new FileAddapter(getContext(), fileList, this);
         recyclerView.setAdapter(fileAddapter);
-//        recyclerView.setHasFixedSize(true);
-//        recyclerView.setLayoutManager(new GridLayoutManager(getContext(),1));
-//        fileList = new ArrayList<>(findFiles(storage));
-//        //fileList.add();
-//        fileAddapter = new FileAddapter(getContext(), fileList, this);
-//        recyclerView.setAdapter(fileAddapter);
+
 
     }
 

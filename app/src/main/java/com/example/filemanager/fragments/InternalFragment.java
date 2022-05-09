@@ -1,5 +1,8 @@
 package com.example.filemanager.fragments;
 
+import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -39,6 +42,11 @@ import com.example.filemanager.R;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -118,6 +126,7 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
 
 
     }
+
 
 
 

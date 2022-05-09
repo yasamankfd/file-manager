@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class FileAddapter extends RecyclerView.Adapter<FileViewHolder> {
@@ -40,8 +42,12 @@ public class FileAddapter extends RecyclerView.Adapter<FileViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull FileViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
+        Date lastModified = new Date(file.get(position).lastModified());
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy  HH:mm");
+        String formattedDateString = formatter.format(lastModified);
         String ss = file.get(position).getName();
         holder.tvName.setText(ss);
+        holder.date.setText(formattedDateString);
 
 
         holder.tvName.setSelected(true);
