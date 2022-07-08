@@ -2,4 +2,9 @@
     <string name="app_name">file manager</string>
     <string name="open_drawer">open navigation drawer</string>
     <string name="close_drawer">close navigation drawer</string>
+    <string-array name="sortoptions">
+        <item>date</item>
+        <item>name</item>
+        <item>size</item>
+    </string-array>
 </resources>

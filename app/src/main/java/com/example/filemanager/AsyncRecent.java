@@ -54,7 +54,7 @@ public class AsyncRecent extends AsyncTask<Void,Void,ArrayList<File>> {
 
             File ff = new File(String.valueOf(path));
             String s = ff.getName();
-            if((s.contains("Sent") || s.contains("cache") || s.contains("Android") || s.contains("Cache") || s.startsWith("."))&& ff.isDirectory()){
+            if((s.contains("Sent") || s.contains("cache") || s.contains("Android") || s.contains("Cache") || s.startsWith(".") || s.contains("Backup") || s.contains("Database"))&& ff.isDirectory()){
                 return  SKIP_SUBTREE;
             }else
             return CONTINUE;

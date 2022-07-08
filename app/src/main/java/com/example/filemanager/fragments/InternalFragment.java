@@ -1,8 +1,5 @@
 package com.example.filemanager.fragments;
 
-import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -42,23 +39,189 @@ import com.example.filemanager.R;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 public class InternalFragment extends Fragment implements OnFileSelectedListener {
 
+    public class AlphanumFileComparator implements Comparator
+    {
+
+        private final boolean isDigit(char ch)
+        {
+            return ch >= 48 && ch <= 57;
+        }
+
+
+        private final String getChunk(String s, int slength, int marker)
+        {
+            StringBuilder chunk = new StringBuilder();
+            char c = s.charAt(marker);
+            chunk.append(c);
+            marker++;
+            if (isDigit(c))
+            {
+                while (marker < slength)
+                {
+                    c = s.charAt(marker);
+                    if (!isDigit(c))
+                        break;
+                    chunk.append(c);
+                    marker++;
+                }
+            } else
+            {
+                while (marker < slength)
+                {
+                    c = s.charAt(marker);
+                    if (isDigit(c))
+                        break;
+                    chunk.append(c);
+                    marker++;
+                }
+            }
+            return chunk.toString();
+        }
+
+        public int compare(Object o1, Object o2)
+        {
+            if (!(o1 instanceof File) || !(o2 instanceof File))
+            {
+                return 0;
+            }
+            File f1 = (File)o1;
+            File f2 = (File)o2;
+            String s1 = f1.getName();
+            String s2 = f2.getName();
+
+            int thisMarker = 0;
+            int thatMarker = 0;
+            int s1Length = s1.length();
+            int s2Length = s2.length();
+
+            while (thisMarker < s1Length && thatMarker < s2Length)
+            {
+                String thisChunk = getChunk(s1, s1Length, thisMarker);
+                thisMarker += thisChunk.length();
+
+                String thatChunk = getChunk(s2, s2Length, thatMarker);
+                thatMarker += thatChunk.length();
+
+                /** If both chunks contain numeric characters, sort them numerically **/
+
+                int result = 0;
+                if (isDigit(thisChunk.charAt(0)) && isDigit(thatChunk.charAt(0)))
+                {
+                    // Simple chunk comparison by length.
+                    int thisChunkLength = thisChunk.length();
+                    result = thisChunkLength - thatChunk.length();
+                    // If equal, the first different number counts
+                    if (result == 0)
+                    {
+                        for (int i = 0; i < thisChunkLength; i++)
+                        {
+                            result = thisChunk.charAt(i) - thatChunk.charAt(i);
+                            if (result != 0)
+                            {
+                                return result;
+                            }
+                        }
+                    }
+                } else
+                {
+                    result = thisChunk.compareTo(thatChunk);
+                }
+
+                if (result != 0)
+                    return result;
+            }
+
+            return s1Length - s2Length;
+        }
+    }
+
+    class CustomAdapter extends BaseAdapter{
+
+        @Override
+        public int getCount() {
+            return longclickitems.length;
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return longclickitems[i];
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            View myView = getLayoutInflater().inflate(R.layout.option_layout,null);
+            ImageView img = myView.findViewById(R.id.imgOption);
+            TextView txt = myView.findViewById(R.id.txtOption);
+            txt.setText(longclickitems[i]);
+            if(longclickitems[i].equals("details")){
+                img.setImageResource(R.drawable.ic_info);
+            }else if(longclickitems[i].equals("delete")){
+                img.setImageResource(R.drawable.ic_delete);
+            }if(longclickitems[i].equals("share")){
+                img.setImageResource(R.drawable.ic_share);
+            }else if(longclickitems[i].equals("rename")){
+                img.setImageResource(R.drawable.ic_rename);
+            }
+            return myView;
+        }
+    }
+
+    class CustomAdapter2 extends BaseAdapter{
+
+        @Override
+        public int getCount() {
+            return sortitems.length;
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return sortitems[i];
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            View myView = getLayoutInflater().inflate(R.layout.option_layout,null);
+
+            TextView txt = myView.findViewById(R.id.txtOption);
+            txt.setText(sortitems[i]);
+            ImageView img = myView.findViewById(R.id.imgOption);
+            if(longclickitems[i].equals("name")){
+                img.setImageResource(R.drawable.ic_name);
+            }else if(longclickitems[i].equals("date")){
+                img.setImageResource(R.drawable.ic_date);
+            }if(longclickitems[i].equals("size")){
+                img.setImageResource(R.drawable.ic_size);
+            }
+            return myView;
+        }
+    }
+
     List<File> fileList;
     FileAddapter fileAddapter;
     File storage;
     String data = "it is null now";
-    String[] items = {"details","rename","delete","share"};
+    String[] longclickitems = {"details","rename","delete","share"};
+    String[] sortitems = {"size","date","name"};
 
 
     View view;
@@ -94,37 +257,63 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
             e.printStackTrace();
         }
 
+        ImageView sort = view.findViewById(R.id.img_sort);
+        sort.setOnClickListener(view -> {
+            final Dialog optionDialog = new Dialog(getContext());
+            optionDialog.setContentView(R.layout.option_dialog);
+            optionDialog.setTitle("select Option :");
+            ListView options = (ListView) optionDialog.findViewById(R.id.list);
+            CustomAdapter2 customAdapter = new CustomAdapter2();
+            options.setAdapter(customAdapter);
+            optionDialog.show();
+            options.setOnItemClickListener((adapterView, view2, i, l) -> {
+                String sortType ="s";
+                String selectedItem = adapterView.getItemAtPosition(i).toString();
+                switch (selectedItem){
+                    case "name":
+                        sortType="n";
+                        break;
+                    case "date":
+                        sortType="d";
+                        break;
+                    case "size" :
+                        sortType="s";
+                        System.out.println("herererererererererererererrrrrrrrt6r76fty---------------------------------------------\n" +
+                                "------------------------------------------------------------------------------------------------------");
+                        break;
+
+                }
+                optionDialog.cancel();
+                try {
+                    runtimePermission(sortType);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
+        });
+
         tv_pathHolder.setText(storage.getAbsolutePath());
-        runtimePermission();
+        try {
+            runtimePermission("s");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return view;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
-    private void runtimePermission() {
+    private void runtimePermission(String sortType) throws IOException {
 
 
         if(checkpermission())
         {
 
-            displayFiles();
+            displayFiles(sortType);
         }else{
             requestpermission();
-            displayFiles();
+            displayFiles(sortType);
         }
-//        Dexter.withContext(getContext()).withPermissions(Manifest.permission.MANAGE_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE).withListener(
-//                new MultiplePermissionsListener() {
-//                    @Override
-//                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-//                        displayFiles();
-//                    }
-//
-//                    @Override
-//                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
-//                        permissionToken.continuePermissionRequest();
-//                    }
-//                }).check();
-
-
     }
 
 
@@ -180,30 +369,51 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
         }
     }
 
-    public ArrayList<File> findFiles(File file){
+    @RequiresApi(api = Build.VERSION_CODES.O)
+
+    public ArrayList<File> findFiles(File file , String sortType) throws IOException {
         ArrayList<File> arrayList = new ArrayList<>();
         File[] files = file.listFiles();
 
         assert files != null;
-        for(File singleFile : files)
-        {
 
-            if (singleFile.isDirectory() && !singleFile.isHidden())
-            {
-                arrayList.add(singleFile);
-            }
-        }
         for( File singleFile : files)
         {
                 arrayList.add(singleFile);
         }
+        if(sortType.contains("d"))
+        {
+            arrayList.sort(Comparator.comparing(File::lastModified).reversed());
+        }else if(sortType.contains("s"))
+        {
+            int len = arrayList.size();
+            for(int i=0;i<len;i++)
+            {
+                for(int j=i;j<len;j++)
+                {
+                    File f1,f2;
+                    f1 = arrayList.get(i);
+                    f2 = arrayList.get(j);
+                    if(Files.size(f1.toPath())>Files.size(f2.toPath()))
+                    {
+                        File f3 = f1;
+                        arrayList.set(i,f2) ;
+                        arrayList.set(j,f3);
+                    }
+                }
+            }
+        }else if(sortType.contains("n"))
+        {
+            arrayList.sort(new AlphanumFileComparator());
+        }
         return arrayList;
     }
-    private void displayFiles() {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void displayFiles(String sortType) throws IOException {
         RecyclerView recyclerView = view.findViewById(R.id.recycler_internal);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(),1));
-        fileList = new ArrayList<>(findFiles(storage));
+        fileList = new ArrayList<>(findFiles(storage,sortType));
         fileAddapter = new FileAddapter(getContext(), fileList, this);
         recyclerView.setAdapter(fileAddapter);
 
@@ -319,39 +529,5 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
         });
     }
 
-    class CustomAdapter extends BaseAdapter{
 
-        @Override
-        public int getCount() {
-            return items.length;
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return items[i];
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            View myView = getLayoutInflater().inflate(R.layout.option_layout,null);
-            ImageView img = myView.findViewById(R.id.imgOption);
-            TextView txt = myView.findViewById(R.id.txtOption);
-            txt.setText(items[i]);
-            if(items[i].equals("details")){
-                img.setImageResource(R.drawable.ic_info);
-            }else if(items[i].equals("delete")){
-                img.setImageResource(R.drawable.ic_delete);
-            }if(items[i].equals("share")){
-                img.setImageResource(R.drawable.ic_share);
-            }else if(items[i].equals("rename")){
-                img.setImageResource(R.drawable.ic_rename);
-            }
-            return myView;
-        }
-    }
 }
