@@ -201,19 +201,19 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
             View myView = getLayoutInflater().inflate(R.layout.option_layout,null);
-
             TextView txt = myView.findViewById(R.id.txtOption);
             txt.setText(sortitems[i]);
             ImageView img = myView.findViewById(R.id.imgOption);
-            if(longclickitems[i].equals("name")){
+            if(sortitems[i].equals("name")){
                 img.setImageResource(R.drawable.ic_name);
-            }else if(longclickitems[i].equals("date")){
+            }else if(sortitems[i].equals("date")){
                 img.setImageResource(R.drawable.ic_date);
-            }if(longclickitems[i].equals("size")){
+            }if(sortitems[i].equals("size")){
                 img.setImageResource(R.drawable.ic_size);
             }
             return myView;
         }
+
     }
 
     List<File> fileList;
@@ -278,8 +278,6 @@ public class InternalFragment extends Fragment implements OnFileSelectedListener
                         break;
                     case "size" :
                         sortType="s";
-                        System.out.println("herererererererererererererrrrrrrrt6r76fty---------------------------------------------\n" +
-                                "------------------------------------------------------------------------------------------------------");
                         break;
 
                 }

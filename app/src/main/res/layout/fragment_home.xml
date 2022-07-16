@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="320dp"
         android:layout_weight="1"
+        android:background="@drawable/home1"
         android:orientation="vertical"
         android:padding="8dp">
 
@@ -38,6 +39,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="images"
+                    android:background="@drawable/textbox"
                     android:textAlignment="center"
                     android:textColor="@color/green"
                     android:textSize="18sp"
@@ -63,6 +65,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="videos"
+                    android:background="@drawable/textbox"
                     android:textAlignment="center"
                     android:textColor="@color/green"
                     android:textSize="18sp"
@@ -88,6 +91,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="musics"
+                    android:background="@drawable/textbox"
                     android:textAlignment="center"
                     android:textColor="@color/green"
                     android:textSize="18sp"
@@ -122,6 +126,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="documents"
+                    android:background="@drawable/textbox"
                     android:textAlignment="center"
                     android:textColor="@color/green"
                     android:textSize="18sp"
@@ -147,6 +152,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="downloads"
+                    android:background="@drawable/textbox"
                     android:textAlignment="center"
                     android:textColor="@color/green"
                     android:textSize="18sp"
@@ -172,6 +178,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="application"
+                    android:background="@drawable/textbox"
                     android:textAlignment="center"
                     android:textColor="@color/green"
                     android:textSize="18sp"
@@ -186,6 +193,7 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
+        android:background="@drawable/home1"
         android:layout_height="wrap_content"
         android:layout_weight="2">
         <View
@@ -196,11 +204,12 @@
         </View>
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:text="recents:"
             android:textColor="@color/green"
             android:paddingLeft="8dp"
             android:textSize="18sp"
+            android:background="@drawable/textbox"
             android:layout_marginTop="8dp">
 
         </TextView>
