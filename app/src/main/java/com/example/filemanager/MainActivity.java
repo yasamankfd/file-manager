@@ -59,13 +59,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+//    @Override
+//    public void onBackPressed(){
+//        getSupportFragmentManager().popBackStackImmediate();
+//        if(drawerLayout.isDrawerOpen(GravityCompat.START))
+//        {
+//            drawerLayout.closeDrawer(GravityCompat.START);
+//        }else {
+//        super.onBackPressed();}
+//    }
     @Override
-    public void onBackPressed(){
-        getSupportFragmentManager().popBackStackImmediate();
-        if(drawerLayout.isDrawerOpen(GravityCompat.START))
-        {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        }else {
-        super.onBackPressed();}
+    public void onBackPressed() {
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
+            getFragmentManager().popBackStack();
+        } else {
+            super.onBackPressed();
+        }
     }
 }

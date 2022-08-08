@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 import android.text.format.Formatter;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -159,7 +161,7 @@ public class CardFragment extends Fragment implements OnFileSelectedListener {
     String[] sortitems = {"size","date","name"};
     ActivityResultLauncher<Intent> activityResultLauncher;
 
-    String sec_storage;
+    String sec_storage="oo";
 
     View view;
 
@@ -186,21 +188,31 @@ for(File f : externalCacheDirs)
     }
 }
 
-        storage = new File(sec_storage);
+if(!sec_storage.equals("oo"))
+{
+    storage = new File(sec_storage);
 
 
-        try{
-            Bundle bundle = getArguments();
-            if(bundle!=null)
-            {
-                data = getArguments().getString("path");
-                storage = new File(data);
-            }
-
-
-        }catch (Exception e){
-            e.printStackTrace();
+    try{
+        Bundle bundle = getArguments();
+        if(bundle!=null)
+        {
+            data = getArguments().getString("path");
+            storage = new File(data);
         }
+
+
+    }catch (Exception e){
+        e.printStackTrace();
+    }
+    tv_pathHolder.setText(storage.getAbsolutePath());
+    try {
+        runtimePermission("s");
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
 
 
         ImageView sort = view.findViewById(R.id.img_sort2);
@@ -237,12 +249,7 @@ for(File f : externalCacheDirs)
 
         });
 
-        tv_pathHolder.setText(storage.getAbsolutePath());
-        try {
-            runtimePermission("s");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
         return view;
 
     }
@@ -543,4 +550,6 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
         }
 
     }
+
+
 }

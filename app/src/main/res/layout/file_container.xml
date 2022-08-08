@@ -62,7 +62,8 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/tvFileSize"
                     android:text="size"
-                    android:textColor="@android:color/darker_gray"
+                    android:textSize="10sp"
+                    android:textColor="#D5285A29"
                     android:layout_marginLeft="10dp">
 
                 </TextView>
@@ -74,7 +75,8 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/tvFiledate"
                     android:text="date"
-                    android:textColor="@android:color/darker_gray"
+                    android:textSize="10sp"
+                    android:textColor="#D5285A29"
                     android:layout_marginLeft="10dp"
                     >
 

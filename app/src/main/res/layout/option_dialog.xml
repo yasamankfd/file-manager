@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#B4435132"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/textbox"
     android:orientation="vertical">
     <ListView
         android:id="@+id/list"

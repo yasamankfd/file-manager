@@ -43,7 +43,7 @@ public class FileAddapter extends RecyclerView.Adapter<FileViewHolder> {
     public void onBindViewHolder(@NonNull FileViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         Date lastModified = new Date(file.get(position).lastModified());
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy  HH:mm");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy     HH:mm");
         String formattedDateString = formatter.format(lastModified);
         String ss = file.get(position).getName();
         holder.tvName.setText(ss);

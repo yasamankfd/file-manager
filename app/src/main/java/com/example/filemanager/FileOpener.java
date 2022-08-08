@@ -1,8 +1,11 @@
 package com.example.filemanager;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
+import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
@@ -31,10 +34,20 @@ public class FileOpener {
         }else if(uri.toString().contains(".mp4")){
             intent.setDataAndType(uri,"video/*");
 
-        }else{
-            intent.setDataAndType(uri,"*/*");
-        }
+        }else if(uri.toString().contains(".apk"))
+            {
+                intent.setDataAndType(uri,"application/vnd.android.package-archive");
+            }else{intent.setDataAndType(uri,"*/*");}
+
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        context.startActivity(intent);
+        try {
+            context.startActivity(intent);
+        }
+        catch (ActivityNotFoundException e) {
+            Toast.makeText(context,
+                    "No Application Available to open file !",
+                    Toast.LENGTH_SHORT).show();
+        }
+
     }
 }

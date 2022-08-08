@@ -425,7 +425,8 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
             InternalFragment internalFragment = new InternalFragment();
             internalFragment.setArguments(bundle);
             assert getFragmentManager() != null;
-            getFragmentManager().beginTransaction().replace(R.id.fragment_container,internalFragment).addToBackStack(null).commit();
+
+            getFragmentManager().beginTransaction().replace(R.id.fragment_container,internalFragment,"tag").addToBackStack(null).commit();
         }else {
 
             try {
@@ -526,6 +527,7 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
             }
         });
     }
+
 
 
 }
