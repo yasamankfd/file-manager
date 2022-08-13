@@ -15,24 +15,17 @@
         <ImageView
             android:layout_width="40dp"
             android:padding="8dp"
+            android:layout_marginLeft="5dp"
             android:layout_height="40dp"
             android:id="@+id/img_fileType"
             android:src="@drawable/ic_folder">
 
         </ImageView>
-
-
-
-
-
-
-
-
-
         <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
+            android:layout_marginLeft="20dp"
         android:orientation="vertical">
             <TextView
                 android:layout_width="match_parent"
@@ -41,7 +34,7 @@
                 android:text="File name.png"
                 android:marqueeRepeatLimit="marquee_forever"
                 android:ellipsize="marquee"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="20dp"
                 android:textSize="18sp"
                 android:textColor="@color/green"
                 android:singleLine="true"
@@ -49,9 +42,10 @@
                 android:gravity="center_vertical">
             </TextView>
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
+                android:layout_marginLeft="20dp"
                 android:orientation="horizontal">
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -77,23 +71,31 @@
                     android:text="date"
                     android:textSize="10sp"
                     android:textColor="#D5285A29"
-                    android:layout_marginLeft="10dp"
-                    >
+                    android:layout_marginLeft="10dp">
 
                 </TextView>
 
 
-
-
-
-            </LinearLayout>
-
         </LinearLayout>
 
 
+    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="right">
+            <ImageView
+                android:id="@+id/iv_check"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:padding="3dp"
+                android:layout_gravity="center"
+                android:paddingRight="10dp"
+                android:src="@drawable/check"
+                android:visibility="gone">
 
-
-
+            </ImageView>
+        </LinearLayout>
 
 
     </LinearLayout>
