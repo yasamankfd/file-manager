@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.format.Formatter;
 import android.view.ActionMode;
@@ -23,6 +25,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -163,6 +166,22 @@ public class FileAddapter extends RecyclerView.Adapter<FileAddapter.FileHolder> 
                                 }
                                     break;
                                 case R.id.menu_share:
+                                    Intent intent = new Intent();
+                                    intent.setAction(Intent.ACTION_SEND_MULTIPLE);
+                                    intent.putExtra(Intent.EXTRA_SUBJECT, "Here are some files.");
+                                    intent.setType("image/jpeg"); /* This example is sharing jpeg images. */
+
+                                    ArrayList<Uri> files = new ArrayList<Uri>();
+
+                                    for(File f : selectedItems /* List of the files you want to send */) {
+                                        Uri uri = FileProvider.getUriForFile(
+                                                view.getContext(),
+                                                view.getContext().getPackageName()+".provider", f);
+                                        files.add(uri);
+                                    }
+
+                                    intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+                                    view.getContext().startActivity(intent);
                             }
                             return true;
                         }
@@ -180,15 +199,7 @@ public class FileAddapter extends RecyclerView.Adapter<FileAddapter.FileHolder> 
                 return true;
             }
         });
-//        holder.more.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//
-//                holder.more.setVisibility(View.GONE);
-//                return true;
-//            }
-//
-//        });
+
         holder.more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
