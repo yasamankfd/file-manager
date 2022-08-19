@@ -4,11 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#EDFADC"
+    android:background="#F6FBF0"
     android:orientation="vertical">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:background="#88A1E157"
         android:orientation="horizontal">
 
         <ImageView
@@ -20,7 +21,23 @@
             android:text="intrnal storage">
         </ImageView>
         <TextView
-            android:text="sort by"
+            android:text="sort by    "
+            android:textColor="@color/green"
+            android:textSize="14sp"
+            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp">
+        </TextView>
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/img_search"
+            android:padding="14dp"
+            android:src="@drawable/ic_search"
+            android:text="intrnal storage">
+        </ImageView>
+        <TextView
+            android:text="search"
             android:textColor="@color/green"
             android:textSize="14sp"
             android:gravity="center_vertical"
@@ -28,12 +45,15 @@
             android:layout_height="50dp">
         </TextView>
 
+
+
     </LinearLayout>
 
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp">
+        android:layout_height="60dp"
+        android:background="#88C7E6A2">
         <ImageView
             android:layout_width="60dp"
             android:layout_height="60dp"

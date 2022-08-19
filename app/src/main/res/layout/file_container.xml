@@ -95,6 +95,18 @@
                 android:visibility="gone">
 
             </ImageView>
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:id="@+id/more"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:padding="3dp"
+                android:src="@drawable/ic_more"
+                android:contextClickable="true">
+
+            </ImageView>
         </LinearLayout>
 
 

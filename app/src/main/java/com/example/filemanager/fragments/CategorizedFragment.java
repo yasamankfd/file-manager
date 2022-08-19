@@ -273,40 +273,40 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
 //        });
 //    }
 
-    class CustomAdapter extends BaseAdapter{
-
-        @Override
-        public int getCount() {
-            return items.length;
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return items[i];
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            View myView = getLayoutInflater().inflate(R.layout.option_layout,null);
-            ImageView img = myView.findViewById(R.id.imgOption);
-            TextView txt = myView.findViewById(R.id.txtOption);
-            txt.setText(items[i]);
-            if(items[i].equals("details")){
-                img.setImageResource(R.drawable.ic_info);
-            }else if(items[i].equals("delete")){
-                img.setImageResource(R.drawable.ic_delete);
-            }if(items[i].equals("share")){
-                img.setImageResource(R.drawable.ic_share);
-            }else if(items[i].equals("rename")){
-                img.setImageResource(R.drawable.ic_rename);
-            }
-            return myView;
-        }
-    }
+//    class CustomAdapter extends BaseAdapter{
+//
+//        @Override
+//        public int getCount() {
+//            return items.length;
+//        }
+//
+//        @Override
+//        public Object getItem(int i) {
+//            return items[i];
+//        }
+//
+//        @Override
+//        public long getItemId(int i) {
+//            return 0;
+//        }
+//
+//        @Override
+//        public View getView(int i, View view, ViewGroup viewGroup) {
+//            View myView = getLayoutInflater().inflate(R.layout.option_layout,null);
+//            ImageView img = myView.findViewById(R.id.imgOption);
+//            TextView txt = myView.findViewById(R.id.txtOption);
+//            txt.setText(items[i]);
+//            if(items[i].equals("details")){
+//                img.setImageResource(R.drawable.ic_info);
+//            }else if(items[i].equals("delete")){
+//                img.setImageResource(R.drawable.ic_delete);
+//            }if(items[i].equals("share")){
+//                img.setImageResource(R.drawable.ic_share);
+//            }else if(items[i].equals("rename")){
+//                img.setImageResource(R.drawable.ic_rename);
+//            }
+//            return myView;
+//        }
+//    }
 
 }

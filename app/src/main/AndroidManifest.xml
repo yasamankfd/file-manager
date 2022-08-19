@@ -3,12 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.filemanager">
 
-
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INSTALL_PACKAGES"
+    <uses-permission
+        android:name="android.permission.INSTALL_PACKAGES"
         tools:ignore="ProtectedPermissions" />
 
     <application
@@ -19,29 +19,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FileManager">
         <activity
+            android:name=".starterActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
-            android:exported="true" android:theme="@style/Theme.FileManager.NoActionBar">
+            android:exported="true"
+            android:theme="@style/Theme.FileManager.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <provider
-            android:authorities="${applicationId}.provider"
             android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_path">
-
-
-            </meta-data>
+                android:resource="@xml/provider_path"></meta-data>
         </provider>
-
-
-
     </application>
 
 </manifest>

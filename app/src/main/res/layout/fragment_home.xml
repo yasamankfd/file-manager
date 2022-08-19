@@ -222,12 +222,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:text="recents  "
-                android:layout_gravity="fill_vertical"
+                android:layout_gravity="center"
                 android:textColor="@color/green"
                 android:paddingLeft="8dp"
-                android:textSize="20sp"
-                android:background="@drawable/textbox"
-                android:layout_marginTop="8dp">
+                android:textSize="27sp">
 
             </TextView>
         </LinearLayout>

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.Formatter;
@@ -12,11 +13,13 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -177,6 +180,43 @@ public class FileAddapter extends RecyclerView.Adapter<FileAddapter.FileHolder> 
                 return true;
             }
         });
+//        holder.more.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//
+//                holder.more.setVisibility(View.GONE);
+//                return true;
+//            }
+//
+//        });
+        holder.more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Animation animFadein = AnimationUtils.loadAnimation(context,R.anim.fade_in);
+                holder.more.startAnimation(animFadein);
+                File ff = file.get(holder.getAdapterPosition());
+                AlertDialog.Builder detailDialog = new AlertDialog.Builder(context);
+                detailDialog.setTitle("details");
+                final TextView details = new TextView(context);
+                detailDialog.setView(details);
+                Date lastModified = new Date(ff.lastModified());
+                SimpleDateFormat formatter = new SimpleDateFormat("dd/mm/yyyy HH:mm:ss");
+                String formattedDate = formatter.format(lastModified);
+                details.setText("file name : "+ff.getName()+"\n"+
+                        "size : "+ Formatter.formatShortFileSize(context,ff.length())+"\n"+
+                        "path : "+ff.getAbsolutePath()+"\n"+
+                        "last modified : "+formattedDate);
+                detailDialog.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i13) {
+                        dialogInterface.cancel();
+                    }
+                });
+
+                AlertDialog alertdialog = detailDialog.create();
+                alertdialog.show();
+            }
+        });
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -212,6 +252,8 @@ public class FileAddapter extends RecyclerView.Adapter<FileAddapter.FileHolder> 
             holder.itemView.setBackgroundColor(Color.TRANSPARENT);
         }
     }
+
+
     private void ClickItem(FileHolder holder) {
         File thisFile = file.get(holder.getAdapterPosition());
         if(holder.imgCheck.getVisibility() == View.GONE){
@@ -231,139 +273,20 @@ public class FileAddapter extends RecyclerView.Adapter<FileAddapter.FileHolder> 
     }
 
     public class FileHolder extends RecyclerView.ViewHolder{
-        ImageView imgFile , imgCheck;
+        ImageView imgFile , imgCheck , more;
         TextView tvSize,tvName,date;
         public FileHolder(@NonNull View itemView) {
             super(itemView);
+            more = itemView.findViewById(R.id.more);
             tvName = itemView.findViewById(R.id.tv_fileName);
             tvSize = itemView.findViewById(R.id.tvFileSize);
             date = itemView.findViewById(R.id.tvFiledate);
             imgFile = itemView.findViewById(R.id.img_fileType);
             imgCheck = itemView.findViewById(R.id.iv_check);
-//            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-//                @Override
-//                public boolean onLongClick(View view) {
-//                    isSelected = true;
-//                    if(selectedItems.contains(file.get(getAdapterPosition()))){
-//                        itemView.setBackgroundColor(Color.TRANSPARENT);
-//                        selectedItems.remove(file.get(getAdapterPosition()));
-//                    }else{
-//                        itemView.setBackgroundResource(R.color.teal_700);
-//                        selectedItems.add(file.get(getAdapterPosition()));
-//                    }
-//                    if(selectedItems.size() == 0){
-//                        isSelected = false;
-//                    }
-//                    return true;
-//                }
-//            });
-//            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-//                @Override
-//                public boolean onLongClick(View view) {
-//                    if(isSelected){
-//                        if(selectedItems.contains(file.get(getAdapterPosition()))){
-//                            itemView.setBackgroundColor(Color.TRANSPARENT);
-//                            selectedItems.remove(file.get(getAdapterPosition()));
-//                        }else {
-//                            itemView.setBackgroundResource(R.color.teal_700);
-//                            selectedItems.add(file.get(getAdapterPosition()));
-//                        }
-//                        if(selectedItems.size() == 0){
-//                            isSelected = false;
-//                        }
-//                    }else;
-//                    return false;
-//                }
-//            });
+
         }
     }
 
-
-    @SuppressLint("SetTextI18n")
-//    @Override
-//    public void onBindViewHolder(@NonNull FileViewHolder holder, @SuppressLint("RecyclerView") int position) {
-//
-//        Date lastModified = new Date(file.get(position).lastModified());
-//        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy     HH:mm");
-//        String formattedDateString = formatter.format(lastModified);
-//        String ss = file.get(position).getName();
-//        holder.tvName.setText(ss);
-//        holder.date.setText(formattedDateString);
-//
-//
-//        holder.tvName.setSelected(true);
-//        int items = 0;
-//        if(file.get(position).isDirectory())
-//        {
-//            File[] files = file.get(position).listFiles();
-//            if(files!=null)
-//            {
-//                for(File singleFile : files){
-//                if(!singleFile.isHidden())
-//                {
-//                    items+=1;
-//                }
-//            }
-//            }
-//            String s = String.valueOf(items);
-//            holder.tvSize.setText(s+"Files");
-//
-//        }else {
-//            String s = Formatter.formatShortFileSize(context, file.get(position).length());
-//            if(s != null)
-//            {
-//                holder.tvSize.setText(s);
-//
-//            }else  holder.tvSize.setText("null");
-//
-//        }
-//        if( file.get(position).getName().toLowerCase().endsWith(".png")){
-//            holder.imgFile.setImageResource(R.drawable.ic_photo);
-//        }else if(file.get(position).getName().toLowerCase().endsWith(".jpg") ){
-//            holder.imgFile.setImageResource(R.drawable.ic_photo);
-//        }else if(file.get(position).getName().toLowerCase().endsWith(".jpeg") ){
-//            holder.imgFile.setImageResource(R.drawable.ic_photo);
-//        }else
-//        if(file.get(position).getName().toLowerCase().endsWith(".pdf")){
-//            holder.imgFile.setImageResource(R.drawable.ic_pdf);
-//        }else
-//        if(file.get(position).getName().toLowerCase().endsWith(".docx")){
-//            holder.imgFile.setImageResource(R.drawable.ic_doc);
-//        }else
-//        if( file.get(position).getName().toLowerCase().endsWith(".wav")){
-//            holder.imgFile.setImageResource(R.drawable.ic_music);
-//        }else
-//            if(file.get(position).getName().toLowerCase().endsWith(".mp3") || file.get(position).getName().toLowerCase().endsWith(".mkv")){
-//            holder.imgFile.setImageResource(R.drawable.ic_music);
-//        }else
-//        if(file.get(position).getName().toLowerCase().endsWith(".mp4")){
-//            holder.imgFile.setImageResource(R.drawable.ic_movie);
-//        }else
-//        if(file.get(position).getName().toLowerCase().endsWith(".apk")){
-//            holder.imgFile.setImageResource(R.drawable.ic_app);
-//        }else if(file.get(position).isDirectory()){
-//            holder.imgFile.setImageResource(R.drawable.ic_folder);
-//        }else {
-//            holder.imgFile.setImageResource(R.drawable.ic_unkown);
-//        }
-//
-//        holder.container.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                listener.onFileClicked(file.get(position));
-//            }
-//        });
-//
-//        holder.container.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View view) {
-//                listener.onFileLongClicked(file.get(position), position);
-//                return true;
-//            }
-//        });
-//    }
-
-    @Override
     public int getItemCount() {
         return file.size();
     }
