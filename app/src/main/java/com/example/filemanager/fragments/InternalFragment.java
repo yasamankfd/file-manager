@@ -1,9 +1,7 @@
 package com.example.filemanager.fragments;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -11,14 +9,23 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.text.format.Formatter;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -26,31 +33,25 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
+import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.filemanager.BuildConfig;
 import com.example.filemanager.FileAddapter;
 import com.example.filemanager.FileOpener;
-import com.example.filemanager.OnFileSelectedListener;
 import com.example.filemanager.R;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class InternalFragment extends Fragment  {
 
     RecyclerView recyclerView ;
-    public class AlphanumFileComparator implements Comparator
+    public static class AlphanumFileComparator implements Comparator
     {
 
         private final boolean isDigit(char ch)
@@ -146,42 +147,6 @@ public class InternalFragment extends Fragment  {
         }
     }
 
-    class CustomAdapter extends BaseAdapter{
-
-        @Override
-        public int getCount() {
-            return longclickitems.length;
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return longclickitems[i];
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            View myView = getLayoutInflater().inflate(R.layout.option_layout,null);
-            ImageView img = myView.findViewById(R.id.imgOption);
-            TextView txt = myView.findViewById(R.id.txtOption);
-            txt.setText(longclickitems[i]);
-            if(longclickitems[i].equals("details")){
-                img.setImageResource(R.drawable.ic_info);
-            }else if(longclickitems[i].equals("delete")){
-                img.setImageResource(R.drawable.ic_delete);
-            }if(longclickitems[i].equals("share")){
-                img.setImageResource(R.drawable.ic_share);
-            }else if(longclickitems[i].equals("rename")){
-                img.setImageResource(R.drawable.ic_rename);
-            }
-            return myView;
-        }
-    }
-
     class CustomAdapter2 extends BaseAdapter{
 
         @Override
@@ -217,11 +182,12 @@ public class InternalFragment extends Fragment  {
 
     }
 
-    List<File> fileList;
+    List<File> fileList,searched;
     FileAddapter fileAddapter;
+    ArrayAdapter<File> adapter;
     File storage;
+    EditText searchbar ;
     String data = "it is null now";
-    String[] longclickitems = {"details","rename","delete","share"};
     String[] sortitems = {"size","date","name"};
 
 
@@ -234,12 +200,8 @@ public class InternalFragment extends Fragment  {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_internal,container,false);
-
         TextView tv_pathHolder = view.findViewById(R.id.tv_pathHolder);
-
-        
-
-        
+        searchbar = view.findViewById(R.id.search11);
         String internalStorage = System.getenv("EXTERNAL_STORAGE");
         assert internalStorage != null;
         storage = new File(internalStorage);
@@ -258,8 +220,49 @@ public class InternalFragment extends Fragment  {
             e.printStackTrace();
         }
 
+        ImageView search = view.findViewById(R.id.img_search);
+        search.setOnClickListener(view1 -> {
+            Animation animFadein = AnimationUtils.loadAnimation(getContext(),R.anim.fade_in);
+            search.startAnimation(animFadein);
+            searchbar.setEnabled(true);
+        });
+        searchbar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                searched = new ArrayList<>();
+                PopupMenu popupMenu = new PopupMenu(getContext(),searchbar);
+                popupMenu.getMenuInflater().inflate(R.menu.searchmenu,popupMenu.getMenu());
+                for(File f : fileList)
+                {
+                    if(f.getName().contains(String.valueOf(charSequence)) && !charSequence.equals(""))
+                    {
+                        searched.add(f);
+                        popupMenu.getMenu().add(f.getName());
+                    }
+                }
+                if(searched.size()>0)
+                { popupMenu.show(); }else ;//Toast.makeText(getContext(), "Not found", Toast.LENGTH_LONG).show();
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        try {
+                            FileOpener.openfile(getContext(),searched.get(menuItem.getOrder()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return true;
+                    }
+                });
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
         ImageView sort = view.findViewById(R.id.img_sort);
         sort.setOnClickListener(view -> {
+            Animation animFadein = AnimationUtils.loadAnimation(getContext(),R.anim.fade_in);
+            sort.startAnimation(animFadein);
             final Dialog optionDialog = new Dialog(getContext());
             optionDialog.setContentView(R.layout.option_dialog);
             optionDialog.setTitle("select Option :");
@@ -280,7 +283,6 @@ public class InternalFragment extends Fragment  {
                     case "size" :
                         sortType="s";
                         break;
-
                 }
                 optionDialog.cancel();
                 try {
@@ -301,23 +303,21 @@ public class InternalFragment extends Fragment  {
         return view;
     }
 
+
+
+
+
     @RequiresApi(api = Build.VERSION_CODES.R)
     private void runtimePermission(String sortType) throws IOException {
 
-
         if(checkpermission())
         {
-
             displayFiles(sortType);
         }else{
             requestpermission();
             displayFiles(sortType);
         }
     }
-
-
-
-
 
     private void requestpermission() {
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.R){
@@ -418,117 +418,6 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
 
     }
 
-//    @Override
-//    public void onFileClicked(File file) {
-//        if(file.isDirectory()){
-//            Bundle bundle = new Bundle();
-//            bundle.putString("path",file.getAbsolutePath());
-//            InternalFragment internalFragment = new InternalFragment();
-//            internalFragment.setArguments(bundle);
-//            assert getFragmentManager() != null;
-//
-//            getFragmentManager().beginTransaction().replace(R.id.fragment_container,internalFragment,"tag").addToBackStack(null).commit();
-//        }else {
-//
-//            try {
-//                FileOpener.openfile(getContext(),file);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public void onFileLongClicked(File file,int position) {
-//
-//        final Dialog optionDialog = new Dialog(getContext());
-//        optionDialog.setContentView(R.layout.option_dialog);
-//        optionDialog.setTitle("select Option :");
-//        ListView options = (ListView) optionDialog.findViewById(R.id.list);
-//        CustomAdapter customAdapter = new CustomAdapter();
-//        options.setAdapter(customAdapter);
-//        optionDialog.show();
-//        options.setOnItemClickListener((adapterView, view, i, l) -> {
-//            String selectedItem = adapterView.getItemAtPosition(i).toString();
-//            switch (selectedItem){
-//                case "details":
-//                    AlertDialog.Builder detailDialog = new AlertDialog.Builder(getContext());
-//                    detailDialog.setTitle("details");
-//                    final TextView details = new TextView(getContext());
-//                    detailDialog.setView(details);
-//                    Date lastModified = new Date(file.lastModified());
-//                    SimpleDateFormat formatter = new SimpleDateFormat("dd/mm/yyyy HH:mm:ss");
-//                    String formattedDate = formatter.format(lastModified);
-//                    details.setText("file name : "+file.getName()+"\n"+
-//                            "size : "+ Formatter.formatShortFileSize(getContext(),file.length())+"\n"+
-//                            "path : "+file.getAbsolutePath()+"\n"+
-//                            "last modified : "+formattedDate);
-//                    detailDialog.setPositiveButton("ok", (dialogInterface, i13) -> optionDialog.cancel());
-//
-//                    AlertDialog alertdialog = detailDialog.create();
-//                    alertdialog.show();
-//                    break;
-//                case "rename":
-//                   AlertDialog.Builder renameDialog = new AlertDialog.Builder(getContext());
-//                   renameDialog.setTitle("rename file : ");
-//                   final EditText name = new EditText(getContext());
-//                   renameDialog.setView(name);
-//                   renameDialog.setPositiveButton("ok", (dialogInterface, i1) -> {
-//                       String new_name = name.getEditableText().toString();
-//                       String extension = file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf("."));
-//                       File current = new File(file.getAbsolutePath());
-//                       File destination = new File(file.getAbsolutePath().replace(file.getName(),new_name+extension));
-//                       if(current.renameTo(destination)){
-//                           fileList.set(position,destination);
-//                            fileAddapter.notifyItemChanged(position);
-//                           Toast.makeText(getContext(),"renamed!",Toast.LENGTH_LONG).show();
-//                       }else Toast.makeText(getContext(),"can not be renamed!",Toast.LENGTH_LONG).show();
-//                   });
-//                    renameDialog.setNegativeButton("cancel", (dialogInterface, i12) -> optionDialog.cancel());
-//                    AlertDialog alertDialog_rename = renameDialog.create();
-//                    alertDialog_rename.show();
-//                    break;
-//                case "delete":
-//                    AlertDialog.Builder deletedialog =  new AlertDialog.Builder(getContext());
-//                    deletedialog.setTitle("delete "+file.getName()+" ?");
-//                    deletedialog.setPositiveButton("yes", (dialogInterface, i14) -> {
-//                        file.delete();
-//                        fileList.remove(position);
-//                        fileAddapter.notifyDataSetChanged();
-//                    });
-//                    deletedialog.setNegativeButton("no", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialogInterface, int i) {
-//                            optionDialog.cancel();
-//
-//                        }
-//                    });
-//                    AlertDialog alertDialog_delete = deletedialog.create();
-//                    alertDialog_delete.show();
-//                    break;
-//                case "share" :
-//                    if(!file.isDirectory())
-//                    {
-//                        String nam = file.getName();
-//                        Intent share = new Intent();
-//                        share.setAction(Intent.ACTION_SEND);
-//                        share.setType("image/jpeg");
-//
-//                        Uri p = FileProvider.getUriForFile(
-//                                requireContext(),
-//                                BuildConfig.APPLICATION_ID + ".provider",
-//                                file);
-//
-//                        share.putExtra(Intent.EXTRA_STREAM,p);
-//                        startActivity(Intent.createChooser(share,"share "+ nam));
-//                    }else Toast.makeText(getContext(),"directory cant be shared !",Toast.LENGTH_SHORT).show();
-//
-//                    break;
-//
-//            }
-//        });
-//    }
-//
 
 
 }

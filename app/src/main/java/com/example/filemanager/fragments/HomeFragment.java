@@ -59,8 +59,6 @@ public class HomeFragment extends Fragment {
     LinearLayout linearimage,linearvideo,linearmusic,lineardoc,lineardownload,linearapk;
 
 
-    String[] items = {"details","rename","delete","share"};
-
 
 
     View view;

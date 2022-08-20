@@ -1,9 +1,6 @@
 package com.example.filemanager.fragments;
-
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -11,14 +8,19 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.text.format.Formatter;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -26,34 +28,158 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.filemanager.AsyncFileTypes;
-import com.example.filemanager.BuildConfig;
 import com.example.filemanager.FileAddapter;
 import com.example.filemanager.FileOpener;
-import com.example.filemanager.OnFileSelectedListener;
 import com.example.filemanager.R;
-
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class CategorizedFragment extends Fragment  {
+    String[] sortitems = {"size","date","name"};
+    public class AlphanumFileComparator implements Comparator
+    {
 
+        private final boolean isDigit(char ch)
+        {
+            return ch >= 48 && ch <= 57;
+        }
+
+
+        private final String getChunk(String s, int slength, int marker)
+        {
+            StringBuilder chunk = new StringBuilder();
+            char c = s.charAt(marker);
+            chunk.append(c);
+            marker++;
+            if (isDigit(c))
+            {
+                while (marker < slength)
+                {
+                    c = s.charAt(marker);
+                    if (!isDigit(c))
+                        break;
+                    chunk.append(c);
+                    marker++;
+                }
+            } else
+            {
+                while (marker < slength)
+                {
+                    c = s.charAt(marker);
+                    if (isDigit(c))
+                        break;
+                    chunk.append(c);
+                    marker++;
+                }
+            }
+            return chunk.toString();
+        }
+
+        public int compare(Object o1, Object o2)
+        {
+            if (!(o1 instanceof File) || !(o2 instanceof File))
+            {
+                return 0;
+            }
+            File f1 = (File)o1;
+            File f2 = (File)o2;
+            String s1 = f1.getName();
+            String s2 = f2.getName();
+
+            int thisMarker = 0;
+            int thatMarker = 0;
+            int s1Length = s1.length();
+            int s2Length = s2.length();
+
+            while (thisMarker < s1Length && thatMarker < s2Length)
+            {
+                String thisChunk = getChunk(s1, s1Length, thisMarker);
+                thisMarker += thisChunk.length();
+
+                String thatChunk = getChunk(s2, s2Length, thatMarker);
+                thatMarker += thatChunk.length();
+
+                /** If both chunks contain numeric characters, sort them numerically **/
+
+                int result = 0;
+                if (isDigit(thisChunk.charAt(0)) && isDigit(thatChunk.charAt(0)))
+                {
+                    // Simple chunk comparison by length.
+                    int thisChunkLength = thisChunk.length();
+                    result = thisChunkLength - thatChunk.length();
+                    // If equal, the first different number counts
+                    if (result == 0)
+                    {
+                        for (int i = 0; i < thisChunkLength; i++)
+                        {
+                            result = thisChunk.charAt(i) - thatChunk.charAt(i);
+                            if (result != 0)
+                            {
+                                return result;
+                            }
+                        }
+                    }
+                } else
+                {
+                    result = thisChunk.compareTo(thatChunk);
+                }
+
+                if (result != 0)
+                    return result;
+            }
+
+            return s1Length - s2Length;
+        }
+    }
+
+    class CustomAdapter2 extends BaseAdapter{
+
+        @Override
+        public int getCount() {
+            return sortitems.length;
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return sortitems[i];
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            View myView = getLayoutInflater().inflate(R.layout.option_layout,null);
+            TextView txt = myView.findViewById(R.id.txtOption);
+            txt.setText(sortitems[i]);
+            ImageView img = myView.findViewById(R.id.imgOption);
+            if(sortitems[i].equals("name")){
+                img.setImageResource(R.drawable.ic_name);
+            }else if(sortitems[i].equals("date")){
+                img.setImageResource(R.drawable.ic_date);
+            }if(sortitems[i].equals("size")){
+                img.setImageResource(R.drawable.ic_size);
+            }
+            return myView;
+        }
+
+    }
     List<File> fileList;
     FileAddapter fileAddapter;
     String type;
-    String[] items = {"details","rename","delete","share"};
     File path;
-
+    EditText searchbar ;
     View view;
 
     @RequiresApi(api = Build.VERSION_CODES.R)
@@ -64,24 +190,105 @@ public class CategorizedFragment extends Fragment  {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_categorized,container,false);
 
-        ImageView img_back = view.findViewById(R.id.img_back);
-
         Bundle b = this.getArguments();
         path = Environment.getExternalStorageDirectory();
         type = b.getString("fileType");
+        searchbar = view.findViewById(R.id.search22);
+        ImageView search = view.findViewById(R.id.img_search3);
+        search.setOnClickListener(view1 -> {
+            Animation animFadein = AnimationUtils.loadAnimation(getContext(),R.anim.fade_in);
+            search.startAnimation(animFadein);
+            searchbar.setEnabled(true);
 
-        runtimePermission();
+        });
+        searchbar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                ArrayList<File> searched = new ArrayList<>();
+                PopupMenu popupMenu = new PopupMenu(getContext(),searchbar);
+                popupMenu.getMenuInflater().inflate(R.menu.searchmenu,popupMenu.getMenu());
+                for(File f : fileList)
+                {
+                    if(f.getName().startsWith(String.valueOf(charSequence)) && !charSequence.equals(""))
+                    {
+                        searched.add(f);
+                        popupMenu.getMenu().add(f.getName());
+                    }
+                }
+                if(searched.size()>0)
+                { popupMenu.show(); }else;// Toast.makeText(getContext(), "Not found", Toast.LENGTH_LONG).show();
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        try {
+                            FileOpener.openfile(getContext(),searched.get(menuItem.getOrder()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return true;
+                    }
+                });
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+        ImageView sort = view.findViewById(R.id.img_sort3);
+        sort.setOnClickListener(view -> {
+            Animation animFadein = AnimationUtils.loadAnimation(getContext(),R.anim.fade_in);
+            sort.startAnimation(animFadein);
+            final Dialog optionDialog = new Dialog(getContext());
+            optionDialog.setContentView(R.layout.option_dialog);
+            optionDialog.setTitle("select Option :");
+            ListView options = (ListView) optionDialog.findViewById(R.id.list);
+            CustomAdapter2 customAdapter = new CustomAdapter2();
+            options.setAdapter(customAdapter);
+            optionDialog.show();
+            options.setOnItemClickListener((adapterView, view2, i, l) -> {
+                String sortType ="s";
+                String selectedItem = adapterView.getItemAtPosition(i).toString();
+                switch (selectedItem){
+                    case "name":
+                        sortType="n";
+                        break;
+                    case "date":
+                        sortType="d";
+                        break;
+                    case "size" :
+                        sortType="s";
+                        break;
+
+                }
+                optionDialog.cancel();
+                try {
+                    runtimePermission(sortType);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
+        });
+
+        try {
+            runtimePermission("s");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return view;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
-    private void runtimePermission() {
+    private void runtimePermission(String sortType) throws IOException {
+
+
         if(checkpermission())
         {
-            displayFiles();
+
+            displayFiles(sortType);
         }else{
             requestpermission();
-            displayFiles();
+            displayFiles(sortType);
         }
     }
 
@@ -134,11 +341,13 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
         }
     }
 
-    private void displayFiles() {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void displayFiles(String sortType) throws IOException {
         RecyclerView recyclerView = view.findViewById(R.id.recycler_internal);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(),1));
         fileList = new ArrayList<>();
+        ArrayList<File> arrayList = new ArrayList<>();
 
         ArrayList<File> a = new ArrayList<>();
         File pathForFiles ;
@@ -156,6 +365,35 @@ return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERM
         }
 
         fileList.addAll(a);
+        for( File singleFile : fileList)
+        {
+            arrayList.add(singleFile);
+        }
+        if(sortType.contains("d"))
+        {
+            arrayList.sort(Comparator.comparing(File::lastModified).reversed());
+        }else if(sortType.contains("s"))
+        {
+            int len = arrayList.size();
+            for(int i=0;i<len;i++)
+            {
+                for(int j=i;j<len;j++)
+                {
+                    File f1,f2;
+                    f1 = arrayList.get(i);
+                    f2 = arrayList.get(j);
+                    if(Files.size(f1.toPath())>Files.size(f2.toPath()))
+                    {
+                        File f3 = f1;
+                        arrayList.set(i,f2) ;
+                        arrayList.set(j,f3);
+                    }
+                }
+            }
+        }else if(sortType.contains("n"))
+        {
+            arrayList.sort(new InternalFragment.AlphanumFileComparator());
+        }
         fileAddapter = new FileAddapter(getContext(), fileList);
         recyclerView.setAdapter(fileAddapter);
     }

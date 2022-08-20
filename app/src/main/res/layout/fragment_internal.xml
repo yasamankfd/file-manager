@@ -36,14 +36,16 @@
             android:src="@drawable/ic_search"
             android:text="intrnal storage">
         </ImageView>
-        <TextView
-            android:text="search"
+        <EditText
             android:textColor="@color/green"
             android:textSize="14sp"
+            android:hint="search"
+            android:id="@+id/search11"
+            android:marqueeRepeatLimit="marquee_forever"
             android:gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="50dp">
-        </TextView>
+        </EditText>
 
 
 

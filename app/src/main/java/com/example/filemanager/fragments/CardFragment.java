@@ -11,15 +11,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.Formatter;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -156,6 +162,7 @@ public class CardFragment extends Fragment  {
     List<File> fileList;
     FileAddapter fileAddapter;
     File storage;
+    EditText searchbar ;
     String data = "it is null now";
     String[] items = {"details","rename","delete","share"};
     String[] sortitems = {"size","date","name"};
@@ -172,7 +179,7 @@ public class CardFragment extends Fragment  {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_card,container,false);
-
+        searchbar = view.findViewById(R.id.search33);
         TextView tv_pathHolder = view.findViewById(R.id.tv_pathHolder);
         ImageView img_back = view.findViewById(R.id.img_back);
 
@@ -214,9 +221,50 @@ if(!sec_storage.equals("oo"))
 }
 
 
+        ImageView search = view.findViewById(R.id.img_search2);
+        search.setOnClickListener(view1 -> {
+            Animation animFadein = AnimationUtils.loadAnimation(getContext(),R.anim.fade_in);
+            search.startAnimation(animFadein);
+            searchbar.setEnabled(true);
 
+        });
+        searchbar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                ArrayList<File> searched = new ArrayList<>();
+                PopupMenu popupMenu = new PopupMenu(getContext(),searchbar);
+                popupMenu.getMenuInflater().inflate(R.menu.searchmenu,popupMenu.getMenu());
+                for(File f : fileList)
+                {
+                    if(f.getName().contains(String.valueOf(charSequence)) && !charSequence.equals(""))
+                    {
+                        searched.add(f);
+                        popupMenu.getMenu().add(f.getName());
+                    }
+                }
+                if(searched.size()>0)
+                { popupMenu.show(); }else ;//Toast.makeText(getContext(), "Not found", Toast.LENGTH_LONG).show();
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        try {
+                            FileOpener.openfile(getContext(),searched.get(menuItem.getOrder()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return true;
+                    }
+                });
+            }
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
         ImageView sort = view.findViewById(R.id.img_sort2);
         sort.setOnClickListener(view -> {
+            Animation animFadein = AnimationUtils.loadAnimation(getContext(),R.anim.fade_in);
+            sort.startAnimation(animFadein);
             final Dialog optionDialog = new Dialog(getContext());
             optionDialog.setContentView(R.layout.option_dialog);
             optionDialog.setTitle("select Option :");
