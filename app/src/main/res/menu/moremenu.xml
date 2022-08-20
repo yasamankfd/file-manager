@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group >
+
+        <item android:id="@+id/nav_card"
+            android:title="details"
+            android:icon="@drawable/ic_card">
+
+        </item>
+        <item android:title="rename"
+            android:icon="@drawable/ic_card">
+        </item>
+
+    </group>
+</menu>

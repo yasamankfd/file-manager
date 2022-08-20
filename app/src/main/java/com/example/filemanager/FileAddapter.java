@@ -20,8 +20,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -206,26 +209,69 @@ public class FileAddapter extends RecyclerView.Adapter<FileAddapter.FileHolder> 
                 Animation animFadein = AnimationUtils.loadAnimation(context,R.anim.fade_in);
                 holder.more.startAnimation(animFadein);
                 File ff = file.get(holder.getAdapterPosition());
-                AlertDialog.Builder detailDialog = new AlertDialog.Builder(context);
-                detailDialog.setTitle("details");
-                final TextView details = new TextView(context);
-                detailDialog.setView(details);
-                Date lastModified = new Date(ff.lastModified());
-                SimpleDateFormat formatter = new SimpleDateFormat("dd/mm/yyyy HH:mm:ss");
-                String formattedDate = formatter.format(lastModified);
-                details.setText("file name : "+ff.getName()+"\n"+
-                        "size : "+ Formatter.formatShortFileSize(context,ff.length())+"\n"+
-                        "path : "+ff.getAbsolutePath()+"\n"+
-                        "last modified : "+formattedDate);
-                detailDialog.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                PopupMenu popupMenu = new PopupMenu(view.getContext(),holder.more);
+                popupMenu.getMenuInflater().inflate(R.menu.moremenu,popupMenu.getMenu());
+                popupMenu.show();
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialogInterface, int i13) {
-                        dialogInterface.cancel();
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        if(menuItem.getTitle().equals("rename"))
+                        {
+                            AlertDialog.Builder renameDialog = new AlertDialog.Builder(view.getContext());
+                            renameDialog.setTitle("rename file : ");
+                            final EditText name1 = new EditText(view.getContext());
+                            renameDialog.setView(name1);
+                            renameDialog.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i1) {
+                                    String new_name = name1.getEditableText().toString();
+                                    String extension = ff.getAbsolutePath().substring(ff.getAbsolutePath().lastIndexOf("."));
+                                    File current = new File(ff.getAbsolutePath());
+                                    File destination = new File(ff.getAbsolutePath().replace(ff.getName(), new_name + extension));
+                                    if (current.renameTo(destination)) {
+                                        file.set(menuItem.getOrder(),destination);
+                                        notifyItemChanged(menuItem.getOrder());
+                                        Toast.makeText(view.getContext(), "renamed!", Toast.LENGTH_LONG).show();
+                                    } else
+                                        Toast.makeText(view.getContext(), "can not be renamed!", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                                renameDialog.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i12) {
+                                        dialogInterface.cancel();
+                                    }
+                                });
+                                AlertDialog alertDialog_rename = renameDialog.create();
+                                alertDialog_rename.show();
+
+                        }else {
+                            AlertDialog.Builder detailDialog = new AlertDialog.Builder(context);
+                            detailDialog.setTitle("details");
+                            final TextView details = new TextView(context);
+                            detailDialog.setView(details);
+                            Date lastModified = new Date(ff.lastModified());
+                            SimpleDateFormat formatter = new SimpleDateFormat("dd/mm/yyyy HH:mm:ss");
+                            String formattedDate = formatter.format(lastModified);
+                            details.setText("file name : "+ff.getName()+"\n"+
+                                    "size : "+ Formatter.formatShortFileSize(context,ff.length())+"\n"+
+                                    "path : "+ff.getAbsolutePath()+"\n"+
+                                    "last modified : "+formattedDate);
+                            detailDialog.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i13) {
+                                    dialogInterface.cancel();
+                                }
+                            });
+
+                            AlertDialog alertdialog = detailDialog.create();
+                            alertdialog.show();
+                        }
+                        return true;
                     }
                 });
 
-                AlertDialog alertdialog = detailDialog.create();
-                alertdialog.show();
+
             }
         });
         holder.itemView.setOnClickListener(new View.OnClickListener() {
